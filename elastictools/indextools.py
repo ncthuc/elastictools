@@ -84,10 +84,11 @@ class IndexTool:
             raise ValueError('index not existed: {}'.format(index_name))
         mapping = self._es.indices.get_mapping(index=index_name, **kwargs)[index_name]['mappings']
         if doc_type:
-            self.set_doctype(mapping, doc_type)
+            IndexTool.mapping_set_doctype(mapping, doc_type)
         return mapping
 
-    def set_doctype(self, mapping, doc_type):
+    @staticmethod
+    def mapping_set_doctype(mapping, doc_type):
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         key = list(mapping.keys())[0]
@@ -95,6 +96,31 @@ class IndexTool:
             return mapping
         mapping[doc_type] = mapping[key]
         mapping.pop(key)
+        return mapping
+
+    @staticmethod
+    def mapping_cast(mapping, property_name, new_type):
+        if len(mapping.keys()) != 1:
+            raise ValueError('There should be exactly one doc_type in a mapping.')
+        key = list(mapping.keys())[0]
+        if property_name not in mapping[key]['properties']:
+            return mapping
+        if type(new_type) is dict:
+            mapping[key]['properties'][property_name] = new_type
+        else:
+            mapping[key]['properties'][property_name]['type'] = new_type
+        return mapping
+
+    @staticmethod
+    def mapping_rename(mapping, property_name, new_name):
+        if len(mapping.keys()) != 1:
+            raise ValueError('There should be exactly one doc_type in a mapping.')
+        key = list(mapping.keys())[0]
+        if property_name not in mapping[key]['properties']:
+            return mapping
+
+        mapping[key]['properties'][new_name] = mapping[key]['properties'][property_name]
+        mapping[key]['properties'].pop(property_name)
         return mapping
 
     def get_settings(self, index_name, **kwargs):
