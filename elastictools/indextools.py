@@ -2,7 +2,7 @@ import elasticsearch
 
 
 class IndexTool:
-    def __init__(self, hosts):
+    def __init__(self, hosts=None, es=None):
         """
         Initialize an ElasticSearch instance with list of hosts
         :param hosts: list of host, ex.:
@@ -11,14 +11,24 @@ class IndexTool:
                 {'host': 'othernode', 'port': 443, 'url_prefix': 'es', 'use_ssl': True},
             ]
         """
-        self._hosts = hosts
-        self._es = elasticsearch.Elasticsearch(hosts)
+        if es:
+            self._es = es
+        else:
+            if hosts is None:
+                raise ValueError('hosts or es param missing.')
+            self._hosts = hosts
+            self._es = elasticsearch.Elasticsearch(hosts)
 
     @classmethod
     def from_url(cls, es_url):
         "Initialize an ElasticSearch with single url"
         hosts = [es_url]
-        return cls(hosts)
+        return cls(hosts=hosts)
+
+    @classmethod
+    def from_es(cls, es):
+        "Initialize an ElasticSearch instance"
+        return cls(es=es)
 
     def exists(self, index_name, **kwargs):
         """
@@ -71,7 +81,7 @@ class IndexTool:
         :return:
         """
         if not self.exists(index_name):
-            return None
+            raise ValueError('index not existed: {}'.format(index_name))
         mapping = self._es.indices.get_mapping(index=index_name, **kwargs)[index_name]['mappings']
         if doc_type:
             self.set_doctype(mapping, doc_type)
@@ -106,7 +116,7 @@ class IndexTool:
         :return:
         """
         if not self.exists(index_name):
-            return None
+            raise ValueError('index not existed: {}'.format(index_name))
         settings = self._es.indices.get_settings(index=index_name, **kwargs)[index_name]['settings']
         settings['index'].pop('creation_date', None)
         settings['index'].pop('version', None)
@@ -145,6 +155,45 @@ class IndexTool:
         else:
             return self._es.indices.create(index=index_name, body={'settings': settings, 'mappings': mapping}, **kwargs)
 
-
     def delete(self, index_name, **kwargs):
         return self._es.indices.delete(index=index_name, ignore=404, **kwargs)
+
+    def clone(self, src_index, dest_index, mapping=None, settings=None, size=None, script=None, overwrite=None,
+              **kwargs):
+        """
+        Create dest_index with mapping and settings and reindex src_index into dest_index
+        :param src_index: source index name
+        :param dest_index: destination index name
+        :param mapping: mapping of new index, if None will clone mapping from src_index
+        :param settings: settings of new index, if None will clone settings from src_index
+        :param kwargs:
+        :return:
+        """
+
+        if not self.exists(src_index):
+            raise ValueError('src_index not existed: {}'.format(src_index))
+
+        if not mapping:
+            mapping = self.clone_mapping(src_index)
+
+        if not settings:
+            settings = self.clone_settings(src_index)
+
+        self.create(dest_index, mapping=mapping, settings=settings, overwrite=overwrite)
+
+        body = {
+            "source": {
+                "index": src_index
+            },
+            "dest": {
+                "index": dest_index
+            }
+        }
+
+        if size:
+            body['size'] = size
+
+        if script:
+            body['script'] = script
+
+        return self._es.reindex(body=body, **kwargs)
