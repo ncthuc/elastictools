@@ -1,3 +1,3 @@
-from elastictools.indextools import IndexTool
+from elastictools.indextools import IndexTools
 
-esi = IndexTool.from_url('http://search.phongvu.vn:9200')
+esi = IndexTools.from_url('http://search.phongvu.vn:9200')

@@ -1,7 +1,7 @@
 import elasticsearch
 
 
-class IndexTool:
+class IndexTools:
     def __init__(self, hosts=None, es=None):
         """
         Initialize an ElasticSearch instance with list of hosts
@@ -11,6 +11,7 @@ class IndexTool:
                 {'host': 'othernode', 'port': 443, 'url_prefix': 'es', 'use_ssl': True},
             ]
         """
+        self._doctool = None
         if es:
             self._es = es
         else:
@@ -29,6 +30,12 @@ class IndexTool:
     def from_es(cls, es):
         "Initialize an ElasticSearch instance"
         return cls(es=es)
+
+    # def doctool(self):
+    #     if not self._doctool:
+    #         self._doctool = DocTool.from_es(self._es)
+    #
+    #     return self._doctool
 
     def exists(self, index_name, **kwargs):
         """
@@ -84,14 +91,20 @@ class IndexTool:
             raise ValueError('index not existed: {}'.format(index_name))
         mapping = self._es.indices.get_mapping(index=index_name, **kwargs)[index_name]['mappings']
         if doc_type:
-            IndexTool.mapping_set_doctype(mapping, doc_type)
+            IndexTools.mapping_set_doctype(mapping, doc_type)
         return mapping
 
     @staticmethod
-    def mapping_set_doctype(mapping, doc_type):
+    def mapping_get_doctype(mapping):
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         key = list(mapping.keys())[0]
+
+        return key
+
+    @staticmethod
+    def mapping_set_doctype(mapping, doc_type):
+        key = IndexTools.mapping_get_doctype(mapping)
         if key == doc_type:
             return mapping
         mapping[doc_type] = mapping[key]
@@ -245,3 +258,14 @@ class IndexTool:
             raise ValueError('index not existed: {}'.format(index_name))
         self._es.indices.close(index=index_name, **kwargs)
         return self._es.indices.open(index=index_name, **kwargs)
+
+    def refresh(self, index_name, **kwargs):
+        """
+        Refresh to make all create/update effected
+        :param index_name:
+        :param kwargs:
+        :return:
+        """
+        if not self.exists(index_name):
+            raise ValueError('index not existed: {}'.format(index_name))
+        return self._es.indices.refresh(index=index_name, **kwargs)

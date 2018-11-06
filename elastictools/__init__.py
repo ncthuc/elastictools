@@ -1,5 +1,6 @@
 from . import indextools
 
 __all__ = [
-    'indextools'
+    'indextools',
+    'doctools'
 ]

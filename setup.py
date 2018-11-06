@@ -14,7 +14,8 @@ setup_args = dict(
 
 
 install_requires = [
-    'elasticsearch>=6.0.0,<7.0.0'
+    'elasticsearch>=6.0.0,<7.0.0',
+    'jinja2'
 ]
 
 if __name__ == '__main__':
