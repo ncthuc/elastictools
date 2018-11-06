@@ -223,3 +223,25 @@ class IndexTool:
             body['script'] = script
 
         return self._es.reindex(body=body, **kwargs)
+
+    def close(self, index_name, **kwargs):
+        if not self.exists(index_name):
+            raise ValueError('index not existed: {}'.format(index_name))
+        return self._es.indices.close(index=index_name, **kwargs)
+
+    def open(self, index_name, **kwargs):
+        if not self.exists(index_name):
+            raise ValueError('index not existed: {}'.format(index_name))
+        return self._es.indices.open(index=index_name, **kwargs)
+
+    def reopen(self, index_name, **kwargs):
+        """
+        this will reload synonym file also
+        :param index_name:
+        :param kwargs:
+        :return:
+        """
+        if not self.exists(index_name):
+            raise ValueError('index not existed: {}'.format(index_name))
+        self._es.indices.close(index=index_name, **kwargs)
+        return self._es.indices.open(index=index_name, **kwargs)
