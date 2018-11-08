@@ -82,7 +82,7 @@ class DocTools:
             raise ValueError('index not existed: {}'.format(index_name))
         if params:
             body = DocTools.render(body, params)
-        print(body)
+        # print(body)
         doctype = IndexTools.mapping_get_doctype(self._indextool.get_mapping(index_name))
         if id:
             return self._es.index(index = index_name, body=body, doc_type=doctype, id=id, **kwargs)
