@@ -1,5 +1,6 @@
 import json
-
+import csv
+from collections import deque
 import elasticsearch
 import elasticsearch.helpers
 import jinja2
@@ -190,3 +191,36 @@ class DocTools:
             return body
         return self._es.msearch(body=body)
 
+    def bulk(self, index_name, actions, thread_count=1, **kwargs):
+        """
+
+        :param index_name:
+        :param actions: any iterable, can also be a generator, in search result format (with `_source`) or orignal format
+        :param thread_count: 1 if using bulk, other wise, usi aarop
+        :param kwargs:
+        :return:
+        """
+        if not self.indextool().exists(index_name):
+            raise ValueError('index not existed: {}'.format(index_name))
+        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        if thread_count<=1:
+            print('Normal bulk')
+            return elasticsearch.helpers.bulk(self._es, actions, index=index_name, doc_type=doctype, **kwargs)
+        else:
+            print('Parallel bulk', thread_count)
+            return deque(elasticsearch.helpers.parallel_bulk(self._es, actions, index=index_name, doc_type=doctype,
+                                                       thread_count=thread_count, **kwargs))
+
+    def bulk_insert_from_csv(self, filename, index_name, csv_fields=None, thread_count=1, **kwargs):
+        """
+
+        :param filename:
+        :param index_name:
+        :param csv_fields: None - use first row as header
+        :param thread_count:
+        :param kwargs:
+        :return:
+        """
+        with open(filename) as f:
+            reader = csv.DictReader(f, fieldnames=csv_fields)
+            return  self.bulk(index_name, reader, thread_count, **kwargs)
