@@ -194,6 +194,12 @@ class IndexTools:
         else:
             return self._es.indices.create(index=index_name, body={'settings': settings, 'mappings': mapping}, **kwargs)
 
+    def create_if_not_exists(self, index_name, body=None, mapping=None, settings=None, **kwargs):
+        if self.exists(index_name):
+            return True
+        return self.create(index_name, body, mapping, settings, **kwargs)
+
+
     def delete(self, index_name, **kwargs):
         return self._es.indices.delete(index=index_name, ignore=404, **kwargs)
 

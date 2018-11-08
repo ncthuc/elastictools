@@ -209,7 +209,7 @@ class DocTools:
         else:
             print('Parallel bulk', thread_count)
             return deque(elasticsearch.helpers.parallel_bulk(self._es, actions, index=index_name, doc_type=doctype,
-                                                       thread_count=thread_count, **kwargs))
+                                                       thread_count=thread_count, **kwargs), maxlen=0)
 
     def bulk_insert_from_csv(self, filename, index_name, csv_fields=None, thread_count=1, **kwargs):
         """
