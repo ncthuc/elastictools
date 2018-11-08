@@ -48,7 +48,7 @@ class IndexTools:
 
     def exists_type(self, index_name, doc_type, **kwargs):
         """
-        Check if an index or multiple indices existed in ES
+        Check if a doctytpe existed in a index ES
         :param index_name: an index name, or list for index names, '_all' for all
         :param doc_type: an doc_type name, or list for doc_type names
         :param kwargs:

@@ -16,7 +16,7 @@ setup_args = dict(
     packages=find_packages(),
     author='Thuc Nguyen',
     author_email='gthuc.nguyen@gmail.com',
-    keywords=['Elastic', 'ElasticSearch', 'ElasticStack'],
+    keywords=['Elastic', 'ElasticSearch', 'Elastic Stack', 'Python 3', 'Elastic 6'],
     url='https://github.com/ncthuc/elastictools',
     download_url='https://pypi.org/project/elastictools/'
 )

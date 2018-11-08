@@ -61,7 +61,7 @@ class DocTools:
             return json.loads(t.render(**params))
 
     def count(self, index_name, body, params, **kwargs):
-        if not self._indextool.exists(index_name):
+        if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         if params:
             body = DocTools.render(body, params)
@@ -78,33 +78,33 @@ class DocTools:
         :param kwargs:
         :return:
         """
-        if not self._indextool.exists(index_name):
+        if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         if params:
             body = DocTools.render(body, params)
         # print(body)
-        doctype = IndexTools.mapping_get_doctype(self._indextool.get_mapping(index_name))
+        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
         if id:
             return self._es.index(index = index_name, body=body, doc_type=doctype, id=id, **kwargs)
         else:
             return self._es.index(index=index_name, body=body, doc_type=doctype, **kwargs)
 
     def delete(self, index_name, id, **kwargs):
-        if not self._indextool.exists(index_name):
+        if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
-        doctype = IndexTools.mapping_get_doctype(self._indextool.get_mapping(index_name))
+        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
         return self._es.delete(index=index_name, id=id, doc_type=doctype, **kwargs)
 
     def exists(self, index_name, id, **kwargs):
-        if not self._indextool.exists(index_name):
+        if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
-        doctype = IndexTools.mapping_get_doctype(self._indextool.get_mapping(index_name))
+        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
         return self._es.exists(index=index_name, id=id, doc_type=doctype, **kwargs)
 
     def get(self, index_name, id, source=False, **kwargs):
-        if not self._indextool.exists(index_name):
+        if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
-        doctype = IndexTools.mapping_get_doctype(self._indextool.get_mapping(index_name))
+        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
         if source:
             return self._es.get_source(index=index_name, id=id, doc_type=doctype, **kwargs)
         else:
@@ -158,7 +158,7 @@ class DocTools:
         :param kwargs:
         :return:
         """
-        if not self._indextool.exists(index_name):
+        if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         if params:
             body = DocTools.render(body, params)
