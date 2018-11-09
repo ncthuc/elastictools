@@ -204,6 +204,7 @@ class IndexTools:
         return self._es.indices.delete(index=index_name, ignore=404, **kwargs)
 
     def clone(self, src_index, dest_index, mapping=None, settings=None, size=None, script=None, overwrite=None,
+              wait_for_completion=False,
               **kwargs):
         """
         Create dest_index with mapping and settings and reindex src_index into dest_index
@@ -241,7 +242,7 @@ class IndexTools:
         if script:
             body['script'] = script
 
-        return self._es.reindex(body=body, **kwargs)
+        return self._es.reindex(body=body, wait_for_completion=wait_for_completion, **kwargs)
 
     def close(self, index_name, **kwargs):
         if not self.exists(index_name):
@@ -275,3 +276,13 @@ class IndexTools:
         if not self.exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         return self._es.indices.refresh(index=index_name, **kwargs)
+
+    def truncate(self, index_name, wait_for_completion=False, **kwargs):
+        if not self.exists(index_name):
+            raise ValueError('index not existed: {}'.format(index_name))
+        query = {
+            "query": {
+                "match_all": {}
+            }
+        }
+        return self._es.delete_by_query(index=index_name, body=query, wait_for_completion=wait_for_completion, **kwargs)
