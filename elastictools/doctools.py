@@ -39,6 +39,10 @@ class DocTools:
         return cls(es=es)
 
     def indextool(self):
+        """
+        Get indextool instance
+        :return:
+        """
         if not self._indextool:
             self._indextool = IndexTools.from_es(self._es)
 
@@ -62,6 +66,14 @@ class DocTools:
             return json.loads(t.render(**params))
 
     def count(self, index_name, body, params, **kwargs):
+        """
+        Count the number of document in an index, that match the body search
+        :param index_name:
+        :param body:
+        :param params:
+        :param kwargs:
+        :return:
+        """
         if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         if params:
@@ -91,18 +103,40 @@ class DocTools:
             return self._es.index(index=index_name, body=body, doc_type=doctype, **kwargs)
 
     def delete(self, index_name, id, **kwargs):
+        """
+        Delete a document with id = `id` in an index
+        :param index_name:
+        :param id:
+        :param kwargs:
+        :return:
+        """
         if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
         return self._es.delete(index=index_name, id=id, doc_type=doctype, **kwargs)
 
     def exists(self, index_name, id, **kwargs):
+        """
+        Check if a document exists in an index or not
+        :param index_name:
+        :param id:
+        :param kwargs:
+        :return: boolean
+        """
         if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
         return self._es.exists(index=index_name, id=id, doc_type=doctype, **kwargs)
 
     def get(self, index_name, id, source=False, **kwargs):
+        """
+        Get a document in an index by it id
+        :param index_name:
+        :param id:
+        :param source:
+        :param kwargs:
+        :return:
+        """
         if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
@@ -115,6 +149,24 @@ class DocTools:
     def make_search_body(body=None, params=None, from_=None, size=None, query=None, _source=None, highlight=None,
                          aggs=None, sort=None, script_fields=None, post_filter=None, rescore=None, min_score=None,
                          collapse=None):
+        """
+        Return a body (Python dict) for search query, based on multiple criteria
+        :param body:
+        :param params:
+        :param from_:
+        :param size:
+        :param query:
+        :param _source:
+        :param highlight:
+        :param aggs:
+        :param sort:
+        :param script_fields:
+        :param post_filter:
+        :param rescore:
+        :param min_score:
+        :param collapse:
+        :return:
+        """
         if not body:
             body = {}
 
@@ -151,7 +203,7 @@ class DocTools:
 
     def search(self, index_name, body=None, params=None, source_only=False, **kwargs):
         """
-
+        Execute a search query
         :param index_name:
         :param body:
         :param params:
@@ -175,7 +227,7 @@ class DocTools:
 
     def msearch(self, indices, queries, return_body_only=False, **kwargs):
         """
-
+        Execute a msearch query
         :param return_body_only: if set, not execute the actual search, just return body
         :param indices: list of indices
         :param queries: list of query body
@@ -193,7 +245,7 @@ class DocTools:
 
     def bulk(self, index_name, actions, thread_count=1, **kwargs):
         """
-
+        Do bulk actions, if thread_count = 1, otherwise call parallel_bulk
         :param index_name:
         :param actions: any iterable, can also be a generator, in search result format (with `_source`) or orignal format
         :param thread_count: 1 if using bulk, other wise, usi aarop
@@ -213,7 +265,7 @@ class DocTools:
 
     def bulk_insert_from_csv(self, filename, index_name, csv_fields=None, thread_count=1, **kwargs):
         """
-
+        bulk insert form csv file
         :param filename:
         :param index_name:
         :param csv_fields: None - use first row as header

@@ -96,6 +96,11 @@ class IndexTools:
 
     @staticmethod
     def mapping_get_doctype(mapping):
+        """
+        Get doctype of the mapping
+        :param mapping:
+        :return:
+        """
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         key = list(mapping.keys())[0]
@@ -104,6 +109,12 @@ class IndexTools:
 
     @staticmethod
     def mapping_set_doctype(mapping, doc_type):
+        """
+        Set/change doctype of a mapping
+        :param mapping:
+        :param doc_type:
+        :return:
+        """
         key = IndexTools.mapping_get_doctype(mapping)
         if key == doc_type:
             return mapping
@@ -113,6 +124,13 @@ class IndexTools:
 
     @staticmethod
     def mapping_cast(mapping, property_name, new_type):
+        """
+        Change type of a property inside a mapping
+        :param mapping:
+        :param property_name:
+        :param new_type:
+        :return:
+        """
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         key = list(mapping.keys())[0]
@@ -126,6 +144,13 @@ class IndexTools:
 
     @staticmethod
     def mapping_rename(mapping, property_name, new_name):
+        """
+        Rename a property inside a mapping
+        :param mapping:
+        :param property_name:
+        :param new_name:
+        :return:
+        """
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         key = list(mapping.keys())[0]
@@ -199,8 +224,13 @@ class IndexTools:
             return True
         return self.create(index_name, body, mapping, settings, **kwargs)
 
-
     def delete(self, index_name, **kwargs):
+        """
+        Delete an index
+        :param index_name:
+        :param kwargs:
+        :return:
+        """
         return self._es.indices.delete(index=index_name, ignore=404, **kwargs)
 
     def clone(self, src_index, dest_index, mapping=None, settings=None, size=None, script=None, overwrite=None,
@@ -245,11 +275,23 @@ class IndexTools:
         return self._es.reindex(body=body, wait_for_completion=wait_for_completion, **kwargs)
 
     def close(self, index_name, **kwargs):
+        """
+        close an index
+        :param index_name:
+        :param kwargs:
+        :return:
+        """
         if not self.exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         return self._es.indices.close(index=index_name, **kwargs)
 
     def open(self, index_name, **kwargs):
+        """
+        Open an index
+        :param index_name:
+        :param kwargs:
+        :return:
+        """
         if not self.exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         return self._es.indices.open(index=index_name, **kwargs)
@@ -278,6 +320,13 @@ class IndexTools:
         return self._es.indices.refresh(index=index_name, **kwargs)
 
     def truncate(self, index_name, wait_for_completion=False, **kwargs):
+        """
+        Remove all documents in an index
+        :param index_name:
+        :param wait_for_completion:
+        :param kwargs:
+        :return:
+        """
         if not self.exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
         query = {
