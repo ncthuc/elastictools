@@ -357,4 +357,17 @@ class DocTools:
         """
         with open(filename) as f:
             reader = csv.DictReader(f, fieldnames=csv_fields)
-            return  self.bulk(index_name, reader, thread_count, **kwargs)
+            return self.bulk(index_name, reader, thread_count, **kwargs)
+
+    def bulk_insert_from_json(self, filename, index_name, thread_count=1, **kwargs):
+        """
+        bulk insert form csv file
+        :param filename:
+        :param index_name:
+        :param thread_count:
+        :param kwargs:
+        :return:
+        """
+        with open(filename) as f:
+            data = json.load(f)
+            return self.bulk(index_name, data, thread_count, **kwargs)
