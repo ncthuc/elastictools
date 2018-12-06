@@ -148,7 +148,7 @@ class DocTools:
     @staticmethod
     def make_search_body(body=None, params=None, from_=None, size=None, query=None, _source=None, highlight=None,
                          aggs=None, sort=None, script_fields=None, post_filter=None, rescore=None, min_score=None,
-                         collapse=None):
+                         collapse=None, source_includes=None, source_excludes=None):
         """
         Return a body (Python dict) for search query, based on multiple criteria
         :param body:
@@ -165,6 +165,8 @@ class DocTools:
         :param rescore:
         :param min_score:
         :param collapse:
+        :param source_includes: list of fields
+        :param source_excludes:
         :return:
         """
         if not body:
@@ -175,6 +177,15 @@ class DocTools:
         body['query'] = query
         if _source:
             body['_source'] = _source
+        if source_excludes or source_includes:
+            if not _source:
+                _source = {}
+            if source_includes:
+                _source['includes'] = source_includes
+            if source_excludes:
+                _source['excludes'] = source_excludes
+            body['_source'] = _source
+
         if highlight:
             body['highlight'] = highlight
         if aggs:
@@ -201,7 +212,7 @@ class DocTools:
 
         return body
 
-    def search(self, index_name, body=None, params=None, source_only=False, **kwargs):
+    def search(self, index_name, body=None, params=None, source_only=False, reserve_id_score=False, **kwargs):
         """
         Execute a search query
         :param index_name:
@@ -220,9 +231,80 @@ class DocTools:
             tmp = res['hits']['hits']
             res = []
             for doc in tmp:
-                doc['_source']['_id'] =doc['_id']
-                doc['_source']['_score'] = doc['_score']
+                if reserve_id_score:
+                    doc['_source']['_id'] = doc['_id']
+                    doc['_source']['_score'] = doc['_score']
                 res.append(doc['_source'])
+        return res
+
+    def dump(self, index_name, query=None, params=None,
+             datetime_field=None, datetime_from=None, datetime_to=None, to_file=False, page_size=1000,
+             source_excludes=None, source_includes=None, **kwargs):
+        """
+
+        :param index_name:
+        :param query:
+        :param params:
+        :param datetime_field:
+        :param datetime_from:  20181101T000000+07:00
+        :param datetime_to:    20181107T235959+07:00
+        :param to_file:
+        :param kwargs:
+        :return:
+        """
+        if not self.indextool().exists(index_name):
+            raise ValueError('index not existed: {}'.format(index_name))
+
+        sort = None
+        if datetime_field:
+            sort = [
+                {
+                  datetime_field: {
+                    "order": "asc"
+                  }
+                }
+            ]
+            query={
+                "bool": {
+                    "must": [query] if query else [{"match_all": {}}],
+                    "filter": [
+                        {
+                            "range": {
+                                "request_time": {
+                                    "gte": datetime_from,
+                                    "lt": datetime_to,
+                                    "format": "basic_date_time_no_millis"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        body = self.make_search_body(query=query, params=params, sort=sort)
+        res = self.search(index_name, body=body, source_only=False, **kwargs)
+        total = res['hits']['total']
+        _from = 0
+        _size = page_size
+        res = []
+        if to_file:
+            file = open(to_file, 'w')
+            file.write('[')
+        while _from < total:
+            print('reading {} to {}...'.format(_from+1, min(_from+_size, total)))
+            body = self.make_search_body(query=query, params=params, sort=sort, from_=_from, size=_size,
+                                         source_includes=source_includes, source_excludes=source_excludes)
+            r = self.search(index_name, body=body, source_only=True, **kwargs)
+            _from += _size
+            if to_file:
+                file.write(',\n'.join([json.dumps(rec) for rec in r]) + (',' if _from<total else ''))
+            else:
+                res.extend(r)
+            # res.append(body)
+
+        if to_file:
+            file.write(']')
+            file.close()
+            return total
         return res
 
     def msearch(self, indices, queries, return_body_only=False, **kwargs):
