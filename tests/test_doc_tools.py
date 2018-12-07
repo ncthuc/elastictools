@@ -1,3 +1,4 @@
 from elastictools.doctools import DocTools
 
-es = DocTools.from_url('http://search.phongvu.vn:9200')
+es = DocTools.from_url('http://localhost:9200')
+esi = es.indextool()
