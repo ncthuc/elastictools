@@ -1,5 +1,19 @@
 # Change log
 
+## [0.1.4] - 2018-12-07
+
+### Added
+- `DocTools.dump()`
+- `DocTools.bulk_insert_from_json()`
+
+## [0.1.3] - 2018-11-09
+
+### Added
+- `DocTools.bulk()`
+- `DocTools.bulk_insert_from_csv()`
+- `IndexTools.create_if_not_exists()`
+- `IndexTools.truncate()`
+
 ## [0.1.2] - 2018-11-08
 
 ### Added

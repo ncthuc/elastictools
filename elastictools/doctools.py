@@ -283,6 +283,7 @@ class DocTools:
         body = self.make_search_body(query=query, params=params, sort=sort)
         res = self.search(index_name, body=body, source_only=False, **kwargs)
         total = res['hits']['total']
+        print('Total: {}'.format(total))
         _from = 0
         _size = page_size
         res = []
