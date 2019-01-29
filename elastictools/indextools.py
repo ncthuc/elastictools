@@ -1,3 +1,5 @@
+import json
+
 import elasticsearch
 
 
@@ -234,7 +236,7 @@ class IndexTools:
         return self._es.indices.delete(index=index_name, ignore=404, **kwargs)
 
     def clone(self, src_index, dest_index, mapping=None, settings=None, size=None, script=None, overwrite=None,
-              wait_for_completion=False,
+              wait_for_completion=False, remote_host=None,
               **kwargs):
         """
         Create dest_index with mapping and settings and reindex src_index into dest_index
@@ -246,14 +248,29 @@ class IndexTools:
         :return:
         """
 
-        if not self.exists(src_index):
-            raise ValueError('src_index not existed: {}'.format(src_index))
+        remote_es = None
+
+        if not remote_host:
+            if not self.exists(src_index):
+                raise ValueError('src_index not existed: {}'.format(src_index))
+        else:
+            remote_es = IndexTools.from_url(remote_host)
+            if not remote_es.exists(src_index):
+                raise ValueError('src_index {} not existed in remote host {}'.format(src_index, remote_host))
 
         if not mapping:
-            mapping = self.clone_mapping(src_index)
+            if remote_host:
+                mapping = remote_es.clone_mapping(src_index)
+            else:
+                mapping = self.clone_mapping(src_index)
 
         if not settings:
-            settings = self.clone_settings(src_index)
+            if remote_host:
+                settings = remote_es.clone_settings(src_index)
+            else:
+                settings = self.clone_settings(src_index)
+        print('settings', json.dumps(settings))
+        print('mapping', json.dumps(mapping))
 
         self.create(dest_index, mapping=mapping, settings=settings, overwrite=overwrite)
 
@@ -265,12 +282,18 @@ class IndexTools:
                 "index": dest_index
             }
         }
+        if remote_host:
+            body['source']['remote'] = {
+                "host": remote_host
+            }
 
         if size:
             body['size'] = size
 
         if script:
             body['script'] = script
+
+        print("Body:", body)
 
         return self._es.reindex(body=body, wait_for_completion=wait_for_completion, **kwargs)
 
