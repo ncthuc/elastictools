@@ -172,7 +172,8 @@ class IndexTools:
         """
         if not self.exists(index_name):
             return None
-        return self._es.indices.get_settings(index=index_name, **kwargs)[index_name]['settings']
+        settings = self._es.indices.get_settings(index=index_name, **kwargs)[index_name]['settings']
+        return settings
 
     def clone_settings(self, index_name, **kwargs):
         """
@@ -201,7 +202,7 @@ class IndexTools:
             return None
         return self._es.indices.stats(index=index_name, **kwargs)['indices'][index_name]
 
-    def create(self, index_name, body=None, mapping=None, settings=None, overwrite=False,  **kwargs):
+    def create(self, index_name, body=None, mapping=None, settings=None, overwrite=False, **kwargs):
         """
         Get settings of an index
         :param body: if specified, ignore settings and mapping
@@ -358,3 +359,63 @@ class IndexTools:
             }
         }
         return self._es.delete_by_query(index=index_name, body=query, wait_for_completion=wait_for_completion, **kwargs)
+
+    def exists_template(self, template_name, **kwargs):
+        """
+        Check if an template or multiple templates (comma separated names) existed in ES
+        :param template_name: an template_name name, or list for template names
+        :param kwargs:
+        :return: True if every template in template_name exists
+        """
+        return self._es.indices.exists_template(template_name, **kwargs)
+
+    def delete_template(self, template_name, **kwargs):
+        """
+        Delete an template
+        :param template_name:
+        :param kwargs:
+        :return:
+        """
+        return self._es.indices.delete_template(name=template_name, ignore=404, **kwargs)
+
+    def get_template(self, template_name, **kwargs):
+        """
+        Get info of an template
+        :param template_name: an index template_name
+        :param kwargs:
+        :return:
+        """
+        if not self.exists_template(template_name):
+            return None
+
+        return self._es.indices.get_template(template_name, **kwargs)[template_name]
+
+    def create_template(self, template_name, patterns, body=None, mapping=None, settings=None, overwrite=False,
+                        **kwargs):
+        """
+        create a template
+        :param body: if specified, ignore settings and mapping
+        :param settings:
+        :param mapping:
+        :param overwrite:
+        :param template_name: a template name
+        :param pattern: template pattern, in array, ex: ["te*", "bar*"]
+        :param kwargs:
+        :return:
+        """
+        if not template_name or not patterns:
+            raise ValueError('Both template and pattern are required.')
+        if self.exists_template(template_name):
+            if not overwrite:
+                raise ValueError('{} template already existed.'.format(template_name))
+            self.delete_template(template_name)
+        if body:
+            return self._es.indices.put_template(name=template_name, body=body, **kwargs)
+        else:
+            body = {'index_patterns': patterns,
+                    'settings': settings,
+                    'mappings': mapping}
+
+            print(json.dumps(body))
+
+            return self._es.indices.put_template(name=template_name, body=body, **kwargs)

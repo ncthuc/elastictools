@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 
 setup_args = dict(
     name='elastictools',
-    version='0.1.4',
+    version='0.1.5',
     description='Useful tools to work with Elastic stack in Python',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,

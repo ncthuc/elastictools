@@ -326,7 +326,7 @@ class DocTools:
             return body
         return self._es.msearch(body=body)
 
-    def bulk(self, index_name, actions, thread_count=1, **kwargs):
+    def bulk(self, index_name, actions, doctype=None, thread_count=1, check_index_existed=True, **kwargs):
         """
         Do bulk actions, if thread_count = 1, otherwise call parallel_bulk
         :param index_name:
@@ -335,9 +335,13 @@ class DocTools:
         :param kwargs:
         :return:
         """
-        if not self.indextool().exists(index_name):
-            raise ValueError('index not existed: {}'.format(index_name))
-        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        if check_index_existed:
+            if not self.indextool().exists(index_name):
+                raise ValueError('index not existed: {}'.format(index_name))
+
+        if not doctype:
+            doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+
         if thread_count<=1:
             print('Normal bulk')
             return elasticsearch.helpers.bulk(self._es, actions, index=index_name, doc_type=doctype, **kwargs)
