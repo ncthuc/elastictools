@@ -96,7 +96,9 @@ class DocTools:
         if params:
             body = DocTools.render(body, params)
         # print(body)
-        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        # fix for ES 7
+        # doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        doctype = '_doc'
         if id:
             return self._es.index(index = index_name, body=body, doc_type=doctype, id=id, **kwargs)
         else:
@@ -112,7 +114,8 @@ class DocTools:
         """
         if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
-        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        # doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        doctype = '_doc'
         return self._es.delete(index=index_name, id=id, doc_type=doctype, **kwargs)
 
     def exists(self, index_name, id, **kwargs):
@@ -125,7 +128,8 @@ class DocTools:
         """
         if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
-        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        # doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        doctype = '_doc'
         return self._es.exists(index=index_name, id=id, doc_type=doctype, **kwargs)
 
     def get(self, index_name, id, source=False, **kwargs):
@@ -139,7 +143,8 @@ class DocTools:
         """
         if not self.indextool().exists(index_name):
             raise ValueError('index not existed: {}'.format(index_name))
-        doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        # doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+        doctype = '_doc'
         if source:
             return self._es.get_source(index=index_name, id=id, doc_type=doctype, **kwargs)
         else:
@@ -340,7 +345,9 @@ class DocTools:
                 raise ValueError('index not existed: {}'.format(index_name))
 
         if not doctype:
+            # fix for ES 7
             doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+            doctype = '_doc'
 
         if thread_count<=1:
             print('Normal bulk')

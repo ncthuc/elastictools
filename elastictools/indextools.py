@@ -107,9 +107,7 @@ class IndexTools:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         # print(mapping.keys())
         key = list(mapping.keys())[0]
-        # fix bug for es 7
-        return '_doc'
-        # return key
+        return key
 
     @staticmethod
     def mapping_set_doctype(mapping, doc_type):
@@ -138,12 +136,12 @@ class IndexTools:
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         key = list(mapping.keys())[0]
-        if property_name not in mapping[key]['properties']:
+        if property_name not in mapping[key]:
             return mapping
         if type(new_type) is dict:
-            mapping[key]['properties'][property_name] = new_type
+            mapping[key][property_name] = new_type
         else:
-            mapping[key]['properties'][property_name]['type'] = new_type
+            mapping[key][property_name]['type'] = new_type
         return mapping
 
     @staticmethod
@@ -158,11 +156,11 @@ class IndexTools:
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
         key = list(mapping.keys())[0]
-        if property_name not in mapping[key]['properties']:
+        if property_name not in mapping[key]:
             return mapping
 
-        mapping[key]['properties'][new_name] = mapping[key]['properties'][property_name]
-        mapping[key]['properties'].pop(property_name)
+        mapping[key][new_name] = mapping[key][property_name]
+        mapping[key].pop(property_name)
         return mapping
 
     def get_settings(self, index_name, **kwargs):
