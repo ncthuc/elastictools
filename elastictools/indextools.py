@@ -105,9 +105,11 @@ class IndexTools:
         """
         if len(mapping.keys()) != 1:
             raise ValueError('There should be exactly one doc_type in a mapping.')
+        # print(mapping.keys())
         key = list(mapping.keys())[0]
-
-        return key
+        # fix bug for es 7
+        return '_doc'
+        # return key
 
     @staticmethod
     def mapping_set_doctype(mapping, doc_type):

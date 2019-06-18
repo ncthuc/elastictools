@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 
 setup_args = dict(
     name='elastictools',
-    version='0.1.5',
+    version='0.2.0',
     description='Useful tools to work with Elastic stack in Python',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,
@@ -16,13 +16,13 @@ setup_args = dict(
     packages=find_packages(),
     author='Thuc Nguyen',
     author_email='gthuc.nguyen@gmail.com',
-    keywords=['Elastic', 'ElasticSearch', 'Elastic Stack', 'Python 3', 'Elastic 6'],
+    keywords=['Elastic', 'ElasticSearch', 'Elastic Stack', 'Python 3', 'Elastic 7'],
     url='https://github.com/ncthuc/elastictools',
     download_url='https://pypi.org/project/elastictools/'
 )
 
 install_requires = [
-    'elasticsearch>=6.0.0,<7.0.0',
+    'elasticsearch>=7.0.2',
     'jinja2'
 ]
 
