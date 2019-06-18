@@ -1,5 +1,8 @@
 # Change log
 
+## [0.2.3] - 2019-06-19
+- Fix multiple doc_type in mapping
+
 ## [0.2.2] - 2019-06-18
 - Fix multiple error related to doc_type in ES7
 - Update elasticsearch-py to 7.0.2

@@ -346,7 +346,7 @@ class DocTools:
 
         if not doctype:
             # fix for ES 7
-            doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
+            # doctype = IndexTools.mapping_get_doctype(self.indextool().get_mapping(index_name))
             doctype = '_doc'
 
         if thread_count<=1:

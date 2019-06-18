@@ -103,8 +103,8 @@ class IndexTools:
         :param mapping:
         :return:
         """
-        if len(mapping.keys()) != 1:
-            raise ValueError('There should be exactly one doc_type in a mapping.')
+        # if len(mapping.keys()) != 1:
+        #     raise ValueError('There should be exactly one doc_type in a mapping.')
         # print(mapping.keys())
         key = list(mapping.keys())[0]
         return key
