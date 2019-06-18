@@ -1,5 +1,9 @@
 # Change log
 
+## [0.2.0] - 2019-06-18
+- Update elasticsearch-py to 7.0.2
+- Fix bug related to doctype while indexing document in ES 7
+
 ## [0.1.4] - 2018-12-07
 
 ### Added
